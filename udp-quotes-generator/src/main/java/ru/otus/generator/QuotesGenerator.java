@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Aleksandr Semykin
@@ -39,26 +40,34 @@ public class QuotesGenerator {
                 .limit(distinctIsinsCount)
                 .collect(Collectors.toList());
 
-        var generated = new ArrayList<Quote>();
-        for (int i = 0; i < distinctIsins.size(); i++) {
-            for (int j = 0; j < quotesCountByIndex.get(i); j++) {
-                Quote currentQuote = quotes.get(distinctIsins.get(i));
-                BigDecimal newBid = currentQuote.getBid()
-                        .add(BigDecimal.valueOf(random.nextDouble(-5d, 5.01d)))
-                        .max(BigDecimal.valueOf(10))
-                        .min(BigDecimal.valueOf(1000))
-                        .setScale(2, RoundingMode.CEILING);
-                BigDecimal newAsk = currentQuote.getAsk()
-                        .add(BigDecimal.valueOf(random.nextDouble(-5d, 5.01d)))
-                        .max(BigDecimal.valueOf(10))
-                        .min(BigDecimal.valueOf(1000))
-                        .setScale(2, RoundingMode.CEILING);
-                Quote newQuote = new Quote(distinctIsins.get(i), newBid.min(newAsk), newBid.max(newAsk));
-                quotes.put(distinctIsins.get(i), newQuote);
-                generated.add(newQuote);
-            }
-        }
-        return generated;
+        final var iterator = quotesCountByIndex.iterator();
+        return distinctIsins.stream()
+                .map(isin -> generate(isin, iterator.next()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private List<Quote> generate(String isin, int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> generateAndUpdate(isin))
+                .collect(Collectors.toList());
+    }
+
+    private Quote generateAndUpdate(String isin) {
+        Quote currentQuote = quotes.get(isin);
+        BigDecimal newBid = incRandomlyAndGet(currentQuote.getBid());
+        BigDecimal newAsk = incRandomlyAndGet(currentQuote.getAsk());
+        Quote newQuote = new Quote(isin, newBid.min(newAsk), newBid.max(newAsk));
+        quotes.put(isin, newQuote);
+        return newQuote;
+    }
+
+    private BigDecimal incRandomlyAndGet(BigDecimal value) {
+        return value
+                .add(BigDecimal.valueOf(random.nextDouble(-5d, 5.01d)))
+                .max(BigDecimal.valueOf(10))
+                .min(BigDecimal.valueOf(1000))
+                .setScale(2, RoundingMode.CEILING);
     }
 
     private void init() {
