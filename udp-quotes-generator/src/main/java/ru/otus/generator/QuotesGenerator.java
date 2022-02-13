@@ -45,13 +45,13 @@ public class QuotesGenerator {
                 Quote currentQuote = quotes.get(distinctIsins.get(i));
                 BigDecimal newBid = currentQuote.getBid()
                         .add(BigDecimal.valueOf(random.nextDouble(-5d, 5.01d)))
-                        .min(BigDecimal.valueOf(10))
-                        .max(BigDecimal.valueOf(1000))
+                        .max(BigDecimal.valueOf(10))
+                        .min(BigDecimal.valueOf(1000))
                         .setScale(2, RoundingMode.CEILING);
                 BigDecimal newAsk = currentQuote.getAsk()
                         .add(BigDecimal.valueOf(random.nextDouble(-5d, 5.01d)))
-                        .min(BigDecimal.valueOf(10))
-                        .max(BigDecimal.valueOf(1000))
+                        .max(BigDecimal.valueOf(10))
+                        .min(BigDecimal.valueOf(1000))
                         .setScale(2, RoundingMode.CEILING);
                 Quote newQuote = new Quote(distinctIsins.get(i), newBid.min(newAsk), newBid.max(newAsk));
                 quotes.put(distinctIsins.get(i), newQuote);
