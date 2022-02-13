@@ -34,7 +34,7 @@ public class QuotesReceiver {
 
             while (!Thread.currentThread().isInterrupted()) {
                 log.info("waiting for quotes");
-                ByteBuffer buf = ByteBuffer.allocate(5000);
+                ByteBuffer buf = ByteBuffer.allocate(6000);
                 buf.clear();
 
                 channel.receive(buf);

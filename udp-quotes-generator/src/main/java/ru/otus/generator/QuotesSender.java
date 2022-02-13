@@ -28,7 +28,7 @@ public class QuotesSender implements Runnable {
     public void run() {
         List<Quote> quotes = generator.generate();
         String quotesJson = gson.toJson(quotes);
-        ByteBuffer buf = ByteBuffer.allocate(5000);
+        ByteBuffer buf = ByteBuffer.allocate(6000);
         buf.clear();
         buf.put(quotesJson.getBytes());
         buf.flip();
