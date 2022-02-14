@@ -30,6 +30,7 @@ allprojects {
             imports {
                 mavenBom("org.springframework.boot:spring-boot-dependencies:2.6.3")
             }
+            dependency("com.google.guava:guava:${Versions.guava}")
             dependency("org.projectlombok:lombok:${Versions.lombok}")
             dependency("com.google.code.gson:gson:${Versions.gson}")
 

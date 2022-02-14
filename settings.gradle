@@ -1,2 +1,3 @@
 rootProject.name = 'upd-quotes'
 include 'udp-quotes-generator'
+include 'udp-quotes'
