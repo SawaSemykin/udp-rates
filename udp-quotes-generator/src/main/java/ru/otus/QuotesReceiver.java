@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.domain.Quote;
+import ru.otus.generator.QuotesSender;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,7 +35,7 @@ public class QuotesReceiver {
 
             while (!Thread.currentThread().isInterrupted()) {
                 log.info("waiting for quotes");
-                ByteBuffer buf = ByteBuffer.allocate(6000);
+                ByteBuffer buf = ByteBuffer.allocate(QuotesSender.BYTES_PER_QUOTE * 100);
                 buf.clear();
 
                 channel.receive(buf);

@@ -1,5 +1,6 @@
 package ru.otus.generator;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.domain.Quote;
@@ -19,7 +20,7 @@ public class QuotesGenerator {
 
     private final HashMap<String, Quote> quotes = new HashMap<>();
     private final List<String> isins = new ArrayList<>();
-    private final int quotesCount;
+    @Getter private final int quotesCount;
     private final int distinctIsinsCount;
     private final int remainCount;
     private final List<Double> remainCountRatioByIndex = List.of(.5, .3, .2); // 50% от remainCount пойдёт на котировки по 1ой бумаге, 30% - по 2ой, 20% - по 3ей

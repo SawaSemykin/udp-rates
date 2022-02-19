@@ -1,15 +1,14 @@
 package ru.otus;
 
+import ru.otus.generator.QuotesGenerator;
 import ru.otus.generator.QuotesGeneratorProcess;
-import ru.otus.generator.Process;
 
 /**
  * @author Aleksandr Semykin
  */
 public class GeneratorApp {
     public static void main(String[] args) {
-        Process process = new QuotesGeneratorProcess();
-        new Thread(process::start).start();
-//        process.stop();
+        var generator = new QuotesGenerator(100, 50);
+        new QuotesGeneratorProcess(1000, generator).start();
     }
 }

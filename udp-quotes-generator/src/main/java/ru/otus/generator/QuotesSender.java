@@ -17,6 +17,7 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 public class QuotesSender implements Runnable {
+    public final static int BYTES_PER_QUOTE = 60;
 
     private static final Logger log = LoggerFactory.getLogger(QuotesSender.class);
 
@@ -28,7 +29,7 @@ public class QuotesSender implements Runnable {
     public void run() {
         List<Quote> quotes = generator.generate();
         String quotesJson = gson.toJson(quotes);
-        ByteBuffer buf = ByteBuffer.allocate(6000);
+        ByteBuffer buf = ByteBuffer.allocate(BYTES_PER_QUOTE * generator.getQuotesCount());
         buf.clear();
         buf.put(quotesJson.getBytes());
         buf.flip();

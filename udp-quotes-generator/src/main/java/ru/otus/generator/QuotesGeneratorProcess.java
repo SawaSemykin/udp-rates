@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.util.concurrent.*;
 
@@ -16,18 +15,26 @@ public class QuotesGeneratorProcess implements Process {
 
     private static final Logger log = LoggerFactory.getLogger(QuotesGeneratorProcess.class);
 
+    private final int sendingRateInMillis;
+    private final QuotesGenerator quotesGenerator;
     private final ScheduledExecutorService quotesGenExecutor = Executors.newSingleThreadScheduledExecutor();
+
+    public QuotesGeneratorProcess(int sendingRateInMillis, QuotesGenerator quotesGenerator) {
+        this.sendingRateInMillis = sendingRateInMillis;
+        this.quotesGenerator = quotesGenerator;
+
+        var shutdownHook = new Thread(this::stop);
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+    }
 
     @Override
     public void start() {
         try (var channel = DatagramChannel.open()) {
-            channel.socket().bind(new InetSocketAddress("localhost", 8081));
-
-            QuotesSender sender = new QuotesSender(channel, new QuotesGenerator(100, 50), new Gson());
+            QuotesSender sender = new QuotesSender(channel, quotesGenerator, new Gson());
             ScheduledFuture<?> future = quotesGenExecutor.scheduleAtFixedRate(
                     sender,
                     0,
-                    1000,
+                    sendingRateInMillis,
                     TimeUnit.MILLISECONDS);
 
             try {
