@@ -23,14 +23,14 @@ public class QuotesGenerator {
     @Getter private final int quotesCount;
     private final int distinctIsinsCount;
     private final int remainCount;
-    private final List<Double> remainCountRatioByIndex = List.of(.5, .3, .2); // 50% от remainCount пойдёт на котировки по 1ой бумаге, 30% - по 2ой, 20% - по 3ей
-//    private final List<Double> remainCountRatioByIndex = List.of(1.d); // 100% от remainCount пойдут на котировки по 1ой бумаге
+    private final List<Double> remainCountDistributionByIndex;
     private final List<Integer> quotesCountByIndex = new ArrayList<>();
     private final Random random = new Random();
 
-    public QuotesGenerator(int quotesCount, int distinctIsinCount) {
+    public QuotesGenerator(int quotesCount, int distinctIsinCount, List<Double> remainCountDistributionByIndex) {
         this.quotesCount = quotesCount;
         this.distinctIsinsCount = distinctIsinCount;
+        this.remainCountDistributionByIndex = remainCountDistributionByIndex;
         remainCount = quotesCount - distinctIsinCount;
         init();
     }
@@ -91,9 +91,9 @@ public class QuotesGenerator {
             quotesCountByIndex.add(1);
         }
         int currentCount = 0;
-        for (int i = 0; i < remainCountRatioByIndex.size() && currentCount != remainCount; i++) {
-            int c = (int) (remainCount * remainCountRatioByIndex.get(i)) != 0 ? (int) (remainCount * remainCountRatioByIndex.get(i)) : 1;
-            if (currentCount + c > remainCount || i == remainCountRatioByIndex.size() - 1){
+        for (int i = 0; i < remainCountDistributionByIndex.size() && currentCount != remainCount; i++) {
+            int c = (int) (remainCount * remainCountDistributionByIndex.get(i)) != 0 ? (int) (remainCount * remainCountDistributionByIndex.get(i)) : 1;
+            if (currentCount + c > remainCount || i == remainCountDistributionByIndex.size() - 1){
                 quotesCountByIndex.set(i, remainCount - currentCount + 1);
                 currentCount = remainCount;
             } else {

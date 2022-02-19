@@ -21,12 +21,12 @@ public class QuotesSender implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(QuotesSender.class);
 
+    private final int destinationPort;
     private final DatagramChannel channel;
     private final QuotesGenerator generator;
     private final Gson gson;
 
-    @Override
-    public void run() {
+    public void send() {
         List<Quote> quotes = generator.generate();
         String quotesJson = gson.toJson(quotes);
         ByteBuffer buf = ByteBuffer.allocate(BYTES_PER_QUOTE * generator.getQuotesCount());
@@ -36,10 +36,15 @@ public class QuotesSender implements Runnable {
 
         int bytesSent = 0;
         try {
-            bytesSent = channel.send(buf, new InetSocketAddress("localhost", 8080));
+            bytesSent = channel.send(buf, new InetSocketAddress("localhost", destinationPort));
         } catch (IOException e) {
             log.error("error on sending quotes: {}", e.getMessage(), e);
         }
         log.info("bytes sent: {}", bytesSent);
+    }
+
+    @Override
+    public void run() {
+        send();
     }
 }

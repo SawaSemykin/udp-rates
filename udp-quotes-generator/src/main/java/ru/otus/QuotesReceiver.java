@@ -9,11 +9,13 @@ import ru.otus.domain.Quote;
 import ru.otus.generator.QuotesSender;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -23,19 +25,28 @@ import java.util.stream.Collectors;
 public class QuotesReceiver {
     private static final Logger log = LoggerFactory.getLogger(QuotesReceiver.class);
 
+    private final int destinationPort;
+    private final int quotesCount;
     private final Gson gson;
 
     public static void main(String[] args) throws IOException {
-        new QuotesReceiver(new Gson()).go();
+        try (InputStream input = GeneratorApp.class.getClassLoader().getResourceAsStream("config.properties")) {
+            Properties props = new Properties();
+            props.load(input);
+            int quotesCount = Integer.parseInt(props.getProperty("quotes.count"));
+            int destPort = Integer.parseInt(props.getProperty("quotes.destination-port"));
+
+            new QuotesReceiver(destPort, quotesCount, new Gson()).go();
+        }
     }
 
     private void go() throws IOException {
         try(var channel = DatagramChannel.open()) {
-            channel.socket().bind(new InetSocketAddress(8080));
+            channel.socket().bind(new InetSocketAddress(destinationPort));
 
             while (!Thread.currentThread().isInterrupted()) {
                 log.info("waiting for quotes");
-                ByteBuffer buf = ByteBuffer.allocate(QuotesSender.BYTES_PER_QUOTE * 100);
+                ByteBuffer buf = ByteBuffer.allocate(QuotesSender.BYTES_PER_QUOTE * quotesCount);
                 buf.clear();
 
                 channel.receive(buf);
