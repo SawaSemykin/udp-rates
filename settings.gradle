@@ -1,2 +1,2 @@
-rootProject.name = 'otusJava'
-include 'udp-rates-generator'
+rootProject.name = 'upd-quotes'
+include 'udp-quotes-generator'
