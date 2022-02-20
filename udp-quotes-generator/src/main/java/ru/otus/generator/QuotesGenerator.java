@@ -74,7 +74,7 @@ public class QuotesGenerator {
 
     private void initQuotes() {
         var baseTemplate = "RU0000000000";
-        for (int i = 0; i < quotesCount; i++) {
+        for (int i = 0; i < distinctIsinsCount; i++) {
             var tail = String.valueOf(i);
             var template = baseTemplate.substring(0, baseTemplate.length() - tail.length());
             var isin = template + tail;
