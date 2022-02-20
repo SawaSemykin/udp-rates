@@ -18,11 +18,11 @@ public class GeneratorApp {
         try (InputStream input = GeneratorApp.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties props = new Properties();
             props.load(input);
-            int quotesCount = Integer.parseInt(props.getProperty("quotes.count"));
-            int isinsCount = Integer.parseInt(props.getProperty("quotes.isins-count"));
-            int sendingRateInMillis = Integer.parseInt(props.getProperty("quotes.sending-rate-in-millis"));
-            int destPort = Integer.parseInt(props.getProperty("quotes.destination-port"));
-            List<Double> remainCountDistribution = Arrays.stream(props.getProperty("quotes.remain-count-distribution").split(","))
+            int destPort = Integer.parseInt(props.getProperty("generator.destination-port"));
+            int quotesCount = Integer.parseInt(props.getProperty("generator.quotes.count"));
+            int isinsCount = Integer.parseInt(props.getProperty("generator.quotes.distinct-isins-count"));
+            int sendingRateInMillis = Integer.parseInt(props.getProperty("generator.quotes.sending-rate-in-millis"));
+            List<Double> remainCountDistribution = Arrays.stream(props.getProperty("generator.quotes.remain-count-distribution").split(","))
                     .map(Double::parseDouble)
                     .collect(Collectors.toList());
 

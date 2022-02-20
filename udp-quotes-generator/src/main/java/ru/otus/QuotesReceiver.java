@@ -33,8 +33,8 @@ public class QuotesReceiver {
         try (InputStream input = GeneratorApp.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties props = new Properties();
             props.load(input);
-            int quotesCount = Integer.parseInt(props.getProperty("quotes.count"));
-            int destPort = Integer.parseInt(props.getProperty("quotes.destination-port"));
+            int quotesCount = Integer.parseInt(props.getProperty("generator.quotes.count"));
+            int destPort = Integer.parseInt(props.getProperty("generator.destination-port"));
 
             new QuotesReceiver(destPort, quotesCount, new Gson()).go();
         }
