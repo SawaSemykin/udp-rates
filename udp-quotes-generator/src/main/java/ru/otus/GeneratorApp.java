@@ -18,6 +18,7 @@ public class GeneratorApp {
         try (InputStream input = GeneratorApp.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties props = new Properties();
             props.load(input);
+            String destHost = props.getProperty("generator.destination-host");
             int destPort = Integer.parseInt(props.getProperty("generator.destination-port"));
             int quotesCount = Integer.parseInt(props.getProperty("generator.quotes.count"));
             int isinsCount = Integer.parseInt(props.getProperty("generator.quotes.distinct-isins-count"));
@@ -28,7 +29,7 @@ public class GeneratorApp {
 
 
             var generator = new QuotesGenerator(quotesCount, isinsCount, remainCountDistribution);
-            new QuotesGeneratorProcess(destPort, sendingRateInMillis, generator).start();
+            new QuotesGeneratorProcess(destHost, destPort, sendingRateInMillis, generator).start();
         }
     }
 }

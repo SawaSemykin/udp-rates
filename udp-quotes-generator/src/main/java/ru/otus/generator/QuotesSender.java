@@ -21,6 +21,7 @@ public class QuotesSender implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(QuotesSender.class);
 
+    private final String destinationHost;
     private final int destinationPort;
     private final DatagramChannel channel;
     private final QuotesGenerator generator;
@@ -36,7 +37,7 @@ public class QuotesSender implements Runnable {
 
         int bytesSent = 0;
         try {
-            bytesSent = channel.send(buf, new InetSocketAddress("localhost", destinationPort));
+            bytesSent = channel.send(buf, new InetSocketAddress(destinationHost, destinationPort));
         } catch (IOException e) {
             log.error("error on sending quotes: {}", e.getMessage(), e);
         }

@@ -15,12 +15,14 @@ public class QuotesGeneratorProcess implements Process {
 
     private static final Logger log = LoggerFactory.getLogger(QuotesGeneratorProcess.class);
 
+    private final String destinationHost;
     private final int destinationPort;
     private final int sendingRateInMillis;
     private final QuotesGenerator quotesGenerator;
     private final ScheduledExecutorService quotesGenExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public QuotesGeneratorProcess(int destinationPort, int sendingRateInMillis, QuotesGenerator quotesGenerator) {
+    public QuotesGeneratorProcess(String destinationHost, int destinationPort, int sendingRateInMillis, QuotesGenerator quotesGenerator) {
+        this.destinationHost = destinationHost;
         this.destinationPort = destinationPort;
         this.sendingRateInMillis = sendingRateInMillis;
         this.quotesGenerator = quotesGenerator;
@@ -32,7 +34,7 @@ public class QuotesGeneratorProcess implements Process {
     @Override
     public void start() {
         try (var channel = DatagramChannel.open()) {
-            QuotesSender sender = new QuotesSender(destinationPort, channel, quotesGenerator, new Gson());
+            QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
             ScheduledFuture<?> future = quotesGenExecutor.scheduleAtFixedRate(
                     sender,
                     0,
