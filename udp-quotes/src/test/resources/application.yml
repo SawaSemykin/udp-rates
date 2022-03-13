@@ -1,0 +1,8 @@
+quotes:
+  udpGeneratorPort: 8090
+  count: 10
+  isinsCount: 10
+
+logging:
+  level:
+    root: DEBUG
