@@ -2,12 +2,10 @@ package ru.otus.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.otus.domain.Quote;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -21,7 +19,6 @@ import java.util.*;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class QuotesReceiverProcessImpl implements QuotesReceiverProcess {
     private final static int BYTES_PER_QUOTE = 60;
 
@@ -29,16 +26,12 @@ public class QuotesReceiverProcessImpl implements QuotesReceiverProcess {
     private final QuotesHandler quotesHandler;
     private final QuotesReceiverProps props;
 
-    @Override
-    @PostConstruct
-    public void init() {
-        var baseTemplate = "RU0000000000";
-        for (int i = 0; i < props.getIsinsCount(); i++) {
-            var tail = String.valueOf(i);
-            var template = baseTemplate.substring(0, baseTemplate.length() - tail.length());
-            var isin = template + tail;
-            quotesHandler.handle(Collections.singletonList(new Quote(isin, BigDecimal.valueOf(100), BigDecimal.valueOf(100))));
-        }
+    public QuotesReceiverProcessImpl(Gson gson, QuotesHandler quotesHandler, QuotesReceiverProps props) {
+        this.gson = gson;
+        this.quotesHandler = quotesHandler;
+        this.props = props;
+
+        init();
     }
 
     @Override
@@ -63,6 +56,16 @@ public class QuotesReceiverProcessImpl implements QuotesReceiverProcess {
     @PreDestroy
     public void stop() {
         log.info("receiver stopped");
+    }
+
+    private void init() {
+        var baseTemplate = "RU0000000000";
+        for (int i = 0; i < props.getIsinsCount(); i++) {
+            var tail = String.valueOf(i);
+            var template = baseTemplate.substring(0, baseTemplate.length() - tail.length());
+            var isin = template + tail;
+            quotesHandler.handle(Collections.singletonList(new Quote(isin, BigDecimal.valueOf(100), BigDecimal.valueOf(100))));
+        }
     }
 
     private List<Quote> receiveQuotes(ByteBuffer buf) {
