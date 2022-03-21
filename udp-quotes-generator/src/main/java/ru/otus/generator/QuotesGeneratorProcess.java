@@ -20,19 +20,13 @@ public class QuotesGeneratorProcess implements Process {
     private final int sendingRateInMillis;
     private final QuotesGenerator quotesGenerator;
     private final ScheduledExecutorService quotesGenExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final DatagramChannel channel;
+    private DatagramChannel channel;
 
     public QuotesGeneratorProcess(String destinationHost, int destinationPort, int sendingRateInMillis, QuotesGenerator quotesGenerator) {
         this.destinationHost = destinationHost;
         this.destinationPort = destinationPort;
         this.sendingRateInMillis = sendingRateInMillis;
         this.quotesGenerator = quotesGenerator;
-        try {
-            channel = DatagramChannel.open();
-        } catch (IOException e) {
-            log.error("Error while opening datagram channel");
-            throw new RuntimeException(e);
-        }
 
         var shutdownHook = new Thread(this::stop);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -40,6 +34,7 @@ public class QuotesGeneratorProcess implements Process {
 
     @Override
     public void start() {
+        openChannel();
         QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
         quotesGenExecutor.scheduleAtFixedRate(
                 sender,
@@ -63,6 +58,28 @@ public class QuotesGeneratorProcess implements Process {
         } else {
             log.warn("Not all quotes have been sent");
         }
+
+        closeChannel();
         log.info("server stopped");
+    }
+
+    private void openChannel() {
+        try {
+            channel = DatagramChannel.open();
+        } catch (IOException e) {
+            log.error("Error while opening datagram channel");
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void closeChannel() {
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (IOException e) {
+                log.error("Error while closing datagram channel");
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
