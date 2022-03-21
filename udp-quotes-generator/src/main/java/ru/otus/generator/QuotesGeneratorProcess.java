@@ -20,12 +20,19 @@ public class QuotesGeneratorProcess implements Process {
     private final int sendingRateInMillis;
     private final QuotesGenerator quotesGenerator;
     private final ScheduledExecutorService quotesGenExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final DatagramChannel channel;
 
     public QuotesGeneratorProcess(String destinationHost, int destinationPort, int sendingRateInMillis, QuotesGenerator quotesGenerator) {
         this.destinationHost = destinationHost;
         this.destinationPort = destinationPort;
         this.sendingRateInMillis = sendingRateInMillis;
         this.quotesGenerator = quotesGenerator;
+        try {
+            channel = DatagramChannel.open();
+        } catch (IOException e) {
+            log.error("Error while opening datagram channel");
+            throw new RuntimeException(e);
+        }
 
         var shutdownHook = new Thread(this::stop);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -33,25 +40,12 @@ public class QuotesGeneratorProcess implements Process {
 
     @Override
     public void start() {
-        try (var channel = DatagramChannel.open()) {
-            QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
-            ScheduledFuture<?> future = quotesGenExecutor.scheduleAtFixedRate(
-                    sender,
-                    0,
-                    sendingRateInMillis,
-                    TimeUnit.MILLISECONDS);
-
-            try {
-                future.get();
-            }  catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("Quotes sending was interrupted", e);
-            } catch (ExecutionException e) {
-                log.error("Quotes sending error", e);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
+        quotesGenExecutor.scheduleAtFixedRate(
+                sender,
+                0,
+                sendingRateInMillis,
+                TimeUnit.MILLISECONDS);
     }
 
     @Override
