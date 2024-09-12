@@ -2,7 +2,7 @@ package ru.otus.service;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
  */
 @Component
 @RequiredArgsConstructor
-@Log4j2
+@Slf4j
 public class QuotesHandlerImpl implements QuotesHandler {
 
     private final SimpMessageSendingOperations messagingTemplate;

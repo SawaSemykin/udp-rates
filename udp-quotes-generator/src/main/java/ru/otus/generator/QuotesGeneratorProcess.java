@@ -20,6 +20,7 @@ public class QuotesGeneratorProcess implements Process {
     private final int sendingRateInMillis;
     private final QuotesGenerator quotesGenerator;
     private final ScheduledExecutorService quotesGenExecutor = Executors.newSingleThreadScheduledExecutor();
+    private DatagramChannel channel;
 
     public QuotesGeneratorProcess(String destinationHost, int destinationPort, int sendingRateInMillis, QuotesGenerator quotesGenerator) {
         this.destinationHost = destinationHost;
@@ -33,25 +34,13 @@ public class QuotesGeneratorProcess implements Process {
 
     @Override
     public void start() {
-        try (var channel = DatagramChannel.open()) {
-            QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
-            ScheduledFuture<?> future = quotesGenExecutor.scheduleAtFixedRate(
-                    sender,
-                    0,
-                    sendingRateInMillis,
-                    TimeUnit.MILLISECONDS);
-
-            try {
-                future.get();
-            }  catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("Quotes sending was interrupted", e);
-            } catch (ExecutionException e) {
-                log.error("Quotes sending error", e);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        openChannel();
+        QuotesSender sender = new QuotesSender(destinationHost, destinationPort, channel, quotesGenerator, new Gson());
+        quotesGenExecutor.scheduleAtFixedRate(
+                sender,
+                0,
+                sendingRateInMillis,
+                TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -69,6 +58,28 @@ public class QuotesGeneratorProcess implements Process {
         } else {
             log.warn("Not all quotes have been sent");
         }
+
+        closeChannel();
         log.info("server stopped");
+    }
+
+    private void openChannel() {
+        try {
+            channel = DatagramChannel.open();
+        } catch (IOException e) {
+            log.error("Error while opening datagram channel");
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void closeChannel() {
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (IOException e) {
+                log.error("Error while closing datagram channel");
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
